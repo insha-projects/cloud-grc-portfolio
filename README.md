@@ -1,9 +1,3 @@
-# Cloud GRC Portfolio
-
-This repository contains hands-on Cloud Governance, Risk, and Compliance projects built in a personal AWS lab environment.
-
-The purpose of this portfolio is to demonstrate practical cloud security and GRC skills, including risk assessment, IAM governance, security control review, audit evidence collection, and compliance-style documentation.
-
 ## Projects
 
 ### 1. AWS Security Risk Assessment
@@ -12,17 +6,8 @@ This project presents a security and compliance assessment of a basic AWS cloud 
 
 **Project folder:** [01-aws-security-risk-assessment](./01-aws-security-risk-assessment)
 
-## Skills Demonstrated
+### 2. IAM Governance Review
 
-- Cloud GRC documentation
-- AWS security fundamentals
-- IAM governance
-- Risk register development
-- Security controls review
-- Audit evidence collection
-- CloudTrail event review
-- Cost governance awareness
+This project presents an IAM governance review of a personal AWS cloud lab environment. It covers IAM users, IAM groups, attached policies, MFA status, group-based access assignment, access risks, and least-privilege recommendations.
 
-## Disclaimer
-
-All projects in this repository were created in a personal AWS lab environment for learning and portfolio purposes. No real company data, production systems, or sensitive information were used.
+**Project folder:** [02-iam-governance-review](./02-iam-governance-review)
