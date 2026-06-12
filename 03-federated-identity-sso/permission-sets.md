@@ -1,30 +1,67 @@
-# Permission Sets
+# Permission Sets and Federated Role Design
 
 ## Purpose
 
-Permission sets define the level of AWS access assigned to each user group through AWS IAM Identity Center.
+This section documents the access design used in the project.
 
-This project uses permission sets to demonstrate role-based access control and least privilege access governance.
+The original project plan considered AWS IAM Identity Center permission sets. During implementation, an account-level SAML federation model was selected instead to avoid creating an AWS Organization or changing the billing structure of the lab account.
 
-## Permission Set Design
+The final implementation uses an AWS IAM federated role with read-only permissions.
 
-| Permission Set | Assigned Group | AWS Managed Policy | Purpose |
-|---|---|---|---|
-| AdministratorAccess | Cloud Administrators | AdministratorAccess | Full administrative access for cloud platform administrators |
-| DeveloperAccess | Cloud Developers | PowerUserAccess | Allows developers to manage AWS resources without full IAM administration rights |
-| SecurityAuditAccess | Cloud Security | SecurityAudit | Allows security users to review security configurations, IAM settings, logs, and compliance evidence |
-| ReadOnlyAuditAccess | Cloud Auditors | ReadOnlyAccess | Allows auditors to view AWS resources and configurations without making changes |
+## Implemented Access Design
+
+| Access Component | Configuration |
+|---|---|
+| Identity Provider | Okta |
+| Federation Protocol | SAML 2.0 |
+| AWS Trust Component | AWS IAM SAML Identity Provider |
+| AWS Federated Role | Okta-ReadOnlyAudit-Role |
+| AWS Managed Policy | ReadOnlyAccess |
+| Assigned Okta Group | Cloud-Auditors |
+
+## Federated Role
+
+The AWS IAM role created for this project was:
+
+`Okta-ReadOnlyAudit-Role`
+
+This role trusts the Okta SAML identity provider and allows assigned Okta users to access the AWS Management Console through federation.
+
+## Permission Policy
+
+The role was assigned the AWS managed policy:
+
+`ReadOnlyAccess`
+
+This policy allows visibility into AWS resources without granting permission to create, modify, or delete resources.
 
 ## Least Privilege Rationale
 
-Each permission set is assigned based on job responsibilities.
+The Cloud-Auditors group represents users who need visibility into AWS resources for audit, compliance, and review purposes.
 
-Cloud administrators require full access to manage the environment. Developers require access to build and manage resources but should not have unrestricted identity management permissions. Security users require visibility into security configurations and logs. Auditors require read-only access to support evidence collection and compliance review.
+These users do not require administrative access. Assigning read-only permissions supports least privilege by allowing evidence collection and configuration review without allowing changes to the AWS environment.
 
-## Privileged Access Consideration
+## Validation
 
-Administrator access should be limited to a small number of authorized users. Users assigned to privileged permission sets should be reviewed regularly and protected with multi-factor authentication.
+Least privilege was validated by attempting to create an IAM user from the federated read-only session.
+
+AWS denied the action because the role did not have permission to perform:
+
+`iam:CreateUser`
+
+This confirmed that the assigned role allowed console visibility but restricted administrative IAM actions.
 
 ## Production Recommendation
 
-In a production environment, custom permission sets should be created instead of relying only on broad AWS managed policies. Custom permission sets allow organizations to apply more precise least privilege controls based on business need.
+In a production environment, organizations may use AWS IAM Identity Center with permission sets across multiple AWS accounts.
+
+Recommended production permission sets may include:
+
+| User Group | Recommended Production Access |
+|---|---|
+| Cloud-Administrators | Administrator access with strict approval and MFA |
+| Cloud-Developers | Limited developer access based on environment |
+| Cloud-Security | Security audit and monitoring access |
+| Cloud-Auditors | Read-only audit access |
+
+Custom permission sets should be preferred over broad managed policies when precise least privilege is required.
