@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Testing and validation confirm that users receive the correct AWS access based on their assigned group and permission set.
+Testing and validation confirm that users receive the correct AWS access based on their assigned group and federated role.
 
 The goal is to verify that access is role-based, least privilege is applied, and users do not receive unnecessary permissions.
 
@@ -10,35 +10,39 @@ The goal is to verify that access is role-based, least privilege is applied, and
 
 | Test Case | User Group | Expected Result | Status |
 |---|---|---|---|
-| Admin user login | Cloud Administrators | User can access AWS with administrator permissions | Pending |
-| Developer user login | Cloud Developers | User can manage AWS resources but should not have full IAM administration access | Pending |
-| Security user login | Cloud Security | User can view security-related AWS configurations and audit information | Pending |
-| Auditor user login | Cloud Auditors | User can view AWS resources but cannot make changes | Pending |
+| Okta user launches AWS SAML application | Cloud-Auditors | User is redirected from Okta to AWS through SAML | Completed |
+| Federated AWS login | Cloud-Auditors | User successfully signs in to AWS using the Okta-ReadOnlyAudit-Role | Completed |
+| Read-only access validation | Cloud-Auditors | User can access AWS console but cannot create IAM users | Completed |
+| Unauthorized IAM action attempt | Cloud-Auditors | AWS blocks iam:CreateUser due to insufficient permissions | Completed |
 
-## Validation Checks
+## Validation Results
 
-The following checks will be performed during implementation:
+The Okta SAML application successfully redirected the assigned user to AWS.
 
-- Confirm users can access the AWS access portal through single sign-on.
-- Confirm each user is assigned to the correct group.
-- Confirm each group is mapped to the correct permission set.
-- Confirm users receive access only to the intended AWS account.
-- Confirm lower-privilege users cannot perform administrative actions.
-- Capture screenshots as audit evidence.
+AWS recognized the SAML assertion from Okta and allowed the user to assume the federated IAM role:
 
-## Evidence to Capture
+`Okta-ReadOnlyAudit-Role`
 
-Screenshots should be collected for:
+The user was able to access the AWS Management Console through the federated role.
 
-- Okta user creation
+To validate least privilege, the user attempted to create a new IAM user. AWS denied the action because the federated role only had read-only permissions.
+
+This confirmed that the SAML federation flow worked and that the assigned role did not allow unauthorized administrative actions.
+
+## Evidence Captured
+
+Screenshots were captured for:
+
 - Okta group creation
-- AWS IAM Identity Center configuration
-- Permission set creation
-- User/group assignment
-- AWS access portal login
-- Successful access test
-- Failed or restricted access test, if available
+- Okta user creation
+- Okta SAML application assignment
+- AWS SAML identity provider configuration
+- AWS federated IAM role
+- Successful AWS federated login
+- Access denied message for unauthorized IAM user creation
 
 ## Testing Status
 
-Testing has not yet been completed. This section will be updated after implementation.
+Testing completed successfully.
+
+The lab confirmed that Okta could act as the identity provider and AWS IAM could trust Okta through SAML federation to grant role-based access.
